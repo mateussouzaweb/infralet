@@ -1,0 +1,28 @@
+# Infralet Script
+
+# Ask for sudo password
+ask_sudo_password
+
+# Ask for system hostname, but it is already defined, so it will be skipped
+_hostname=$(ask SYSTEM_HOSTNAME "What is the system hostname?")
+
+# Ask for username - this is not defined
+_username=$(ask USERNAME "What is your name?")
+
+# Just print the variables
+echo "The variables anwsers is:"
+echo "Hostname: $_hostname"
+echo "Username: $_username"
+
+# Ask for Y or N
+_did_you_get=$(ask_yes_no DID_YOU_GET "Did you get how it works?")
+
+if [[ $_did_you_get == "y" ]]; then
+    success "You get it! :)"
+else
+    error "You don't get it... :/"
+fi
+
+info "Well done! This is just a nice info message"
+error "And this is a error message"
+success "This sample has been finished"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # set -u
 
-export INFRALET_VERSION="0.0.1"
+export INFRALET_VERSION="0.0.2"
 export RUN_PATH="$(pwd)"
 export RUN_VARIABLES=""
 
@@ -86,19 +86,21 @@ ask() {
 }
 
 #
-# Ask for a boolean response
+# Ask for a yes/no response
 # @param $1 variable name
 # @param $2 question
-# @return 0 if N, 1 if Y
+# @return false if N, true if Y
 #
-ask_boolean() {
+ask_yes_no() {
+
+    local VARIABLE=$1
+    local QUESTION=$2
 
     while true; do
-        ANWSER=$(ask $1 "$2 [Y/N]")
+        ANWSER=$(ask $VARIABLE "$QUESTION [Y/N]")
         case $ANWSER in
-            [Yy]*) return 0  ;;
-            [Nn]*) echo "Aborted" ; return  1 ;;
-            *) unset $1; echo "Please write only Y or N..."
+            [Yy]*) echo "y"; return 0 ;;
+            [Nn]*) echo "n"; return 1 ;;
         esac
     done
 
@@ -305,7 +307,7 @@ upgrade() {
     source $LOCATION
     write_variables
 
-    success "Module upgrad completed."
+    success "Module upgrade completed."
     exit 0
 
 }

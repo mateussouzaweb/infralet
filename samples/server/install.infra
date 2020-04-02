@@ -4,18 +4,18 @@
 ask_sudo_password
 
 # Ask for system hostname, but it is already defined, so it will be skipped
-ask SYSTEM_HOSTNAME "What is the system hostname?"
+ask SYSTEM_HOSTNAME "my-machine" "What is the system hostname?"
 
 # Ask for username - this is not defined
-ask USERNAME "What is your name?"
+ask SYSTEM_USERNAME "MATEUS" "What is your name?"
 
 # Just print the variables
-echo "The variables anwsers is:"
+echo "The variables answers is:"
 echo "Hostname: $SYSTEM_HOSTNAME"
-echo "Username: $USERNAME"
+echo "Username: $SYSTEM_USERNAME"
 
 # Ask for Y or N
-ask_yes_no DID_YOU_GET "Did you get how it works?"
+ask_yes_no DID_YOU_GET "Y" "Did you get how it works?"
 
 if [[ $DID_YOU_GET == "Y" ]]; then
     success "You get it! :)"

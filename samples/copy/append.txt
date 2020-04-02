@@ -1,1 +1,1 @@
-The content of this file is also appended to the destination ${USERNAME}!
+The content of this file is also appended to the destination ${THE_USERNAME}!

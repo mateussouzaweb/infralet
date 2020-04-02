@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # set -u
 
-export INFRALET_VERSION="0.0.5"
+export INFRALET_VERSION="0.0.6"
 export RUN_PATH="$(pwd)"
 export RUN_MODULE=""
 export RUN_MODULE_LOCATION=""
@@ -78,16 +78,24 @@ error() {
 #
 # Ask for a response
 # @param $1 variable name
-# @param $2 question
+# @param $2 default value
+# @param $3 question
 # @return something
 #
 ask() {
 
     local VARIABLE="$1"
-    local QUESTION="$2"
+    local DEFAULT="$2"
+    local QUESTION="$3"
+    local EXTRA=""
+
+    if [ $DEFAULT != "" ]; then
+        EXTRA=" [Default: $DEFAULT]"
+    fi
 
     if [[ ${!VARIABLE} == "" ]] ; then
-        read -p "$QUESTION: " ANWSER
+        read -p "$QUESTION$EXTRA: " ANWSER
+        ANWSER="${ANWSER:-${DEFAULT}}"
         export "$VARIABLE=$ANWSER"
     fi
 
@@ -96,16 +104,18 @@ ask() {
 #
 # Ask for a yes/no response
 # @param $1 variable name
-# @param $2 question
+# @param $2 default value
+# @param $3 question
 # @return false if N, true if Y
 #
 ask_yes_no() {
 
     local VARIABLE="$1"
-    local QUESTION="$2"
+    local DEFAULT="$2"
+    local QUESTION="$3"
 
     while true; do
-        ask $VARIABLE "$QUESTION [Y/N]"
+        ask $VARIABLE $DEFAULT "$QUESTION (Y/N)"
         case ${!VARIABLE} in
             [Yy]*) export "$VARIABLE=Y"; return 0 ;;
             [Nn]*) export "$VARIABLE=N"; return 1 ;;
@@ -268,6 +278,7 @@ help() {
     echo ""
     echo "infralet version - See the program version"
     echo "infralet help - Print this help message"
+    echo ""
     echo "infralet install [module] - Install a user defined module"
     echo "infralet upgrade [module] - Upgrade a user defined module"
     echo ""

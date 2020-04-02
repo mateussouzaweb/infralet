@@ -1,6 +1,6 @@
 # Infralet Script
 
-ask USERNAME "What is your name?"
+ask THE_USERNAME "MATEUS" "What is your name?"
 
 # Copy and append always is relative to the module folder
 copy source.txt destination.txt

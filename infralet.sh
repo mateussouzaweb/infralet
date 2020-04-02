@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # set -u
 
-export INFRALET_VERSION="0.0.3"
+export INFRALET_VERSION="0.0.4"
 export RUN_PATH="$(pwd)"
 export RUN_MODULE=""
 export RUN_MODULE_LOCATION=""
@@ -98,8 +98,8 @@ ask_yes_no() {
     while true; do
         ask $VARIABLE "$QUESTION [Y/N]"
         case ${!VARIABLE} in
-            [Yy]*) return 0 ;;
-            [Nn]*) return 1 ;;
+            [Yy]*) export "$VARIABLE=Y"; return 0 ;;
+            [Nn]*) export "$VARIABLE=N"; return 1 ;;
         esac
     done
 
@@ -111,12 +111,10 @@ ask_yes_no() {
 #
 ask_sudo_password() {
 
-    info "Prompting for sudo password..."
-
-    if sudo -v; then
+    if [ ${EUID:-$(id -u)} -eq 0 ]; then
         success "Sudo credentials OK."
     else
-        error "Failed to obtain sudo credentials."
+        error "Running as not sudo, please use: sudo infralet ..."
         exit 1;
     fi
 
@@ -133,7 +131,7 @@ ask_sudo_password() {
 #
 copy() {
 
-    local SOURCE="$RUN_MODULE_LOCATION/$1"
+    local SOURCE="$1"
     local DESTINATION="$2"
     local COMMENT="$3"
     local OVERWRITTEN=""
@@ -177,7 +175,7 @@ $(cat $DESTINATION)" > "$DESTINATION"
 #
 symlink() {
 
-    local SOURCE="$RUN_MODULE_LOCATION/$1"
+    local SOURCE="$1"
     local DESTINATION="$2"
     local OVERWRITTEN=""
 
@@ -282,7 +280,7 @@ install() {
     RUN_MODULE_LOCATION="$LOCATION"
 
     activate_variables $MODULE $VARIABLES
-    source "$LOCATION/$FILE"
+    cd $LOCATION && source $FILE
 
     success "Module installation completed."
     exit 0
@@ -318,7 +316,7 @@ upgrade() {
     RUN_MODULE_LOCATION="$LOCATION"
 
     activate_variables $MODULE $VARIABLES
-    source "$LOCATION/$FILE"
+    cd $LOCATION && source $FILE
 
     success "Module upgrade completed."
     exit 0

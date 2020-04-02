@@ -17,7 +17,7 @@ echo "Username: $USERNAME"
 # Ask for Y or N
 ask_yes_no DID_YOU_GET "Did you get how it works?"
 
-if [[ $DID_YOU_GET == "y" ]]; then
+if [[ $DID_YOU_GET == "Y" ]]; then
     success "You get it! :)"
 else
     error "You don't get it... :/"

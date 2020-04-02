@@ -89,7 +89,7 @@ ask() {
     local QUESTION="$3"
     local EXTRA=""
 
-    if [ $DEFAULT != "" ]; then
+    if [ ! -z "$DEFAULT" ]; then
         EXTRA=" [Default: $DEFAULT]"
     fi
 

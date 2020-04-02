@@ -1,0 +1,4 @@
+Hello ${USERNAME}!
+This file will be generated in another location with variable substitution.
+
+Using infralet ${INFRALET_VERSION}

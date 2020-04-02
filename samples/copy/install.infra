@@ -1,0 +1,8 @@
+# Infralet Script
+
+ask USERNAME "What is your name?"
+
+# Copy always is relative to the module folder
+copy source.txt "$RUN_MODULE_LOCATION/destination.txt"
+
+cat "$RUN_MODULE_LOCATION/destination.txt"

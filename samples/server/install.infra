@@ -25,4 +25,5 @@ fi
 
 info "Well done! This is just a nice info message"
 error "And this is a error message"
+warning "We can also trigger a warning message"
 success "This sample has been finished"

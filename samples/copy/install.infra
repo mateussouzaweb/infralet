@@ -2,7 +2,10 @@
 
 ask USERNAME "What is your name?"
 
-# Copy always is relative to the module folder
-copy source.txt "$RUN_MODULE_LOCATION/destination.txt"
+# Copy and append always is relative to the module folder
+copy source.txt destination.txt
+append append.txt destination.txt
 
-cat "$RUN_MODULE_LOCATION/destination.txt"
+# Print the result
+cat destination.txt
+echo ""

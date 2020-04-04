@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # set -u
 
-export INFRALET_VERSION="0.0.6"
+export INFRALET_VERSION="0.0.7"
 export RUN_PATH="$(pwd)"
 export RUN_MODULE=""
-export RUN_MODULE_LOCATION=""
+export RUN_MODULE_PATH=""
 
 #
 # Printing colored text
@@ -276,11 +276,15 @@ help() {
     echo ""
     echo "Whatever you do, infralet it!"
     echo ""
-    echo "infralet version - See the program version"
-    echo "infralet help - Print this help message"
+    echo "infralet version - See the program version."
+    echo "infralet help - Print this help message."
     echo ""
-    echo "infralet install [module] - Install a user defined module"
-    echo "infralet upgrade [module] - Upgrade a user defined module"
+    echo "infralet extract [module] [action]"
+    echo "  - Extract module variables created by ask commands."
+    echo "infralet install [module]"
+    echo "  - Install a user defined module."
+    echo "infralet upgrade [module]"
+    echo "  - Upgrade a user defined module."
     echo ""
 
 }
@@ -298,8 +302,8 @@ activate_variables() {
     local FILE="variables.env"
 
     if [ -z "$FILE_LOCATION" ]; then
-        if [ -f "$RUN_MODULE_LOCATION/$FILE" ]; then
-            FILE_LOCATION="$RUN_MODULE_LOCATION/$FILE"
+        if [ -f "$RUN_MODULE_PATH/$FILE" ]; then
+            FILE_LOCATION="$RUN_MODULE_PATH/$FILE"
         else
             FILE_LOCATION="$RUN_PATH/$FILE"
         fi
@@ -313,6 +317,32 @@ activate_variables() {
     fi
 
     source $FILE_LOCATION
+
+}
+
+#
+# Extract and print variables with their default values on stdout
+# @param $1 module
+# @param $2 command
+# @return string
+#
+extract() {
+
+    local MODULE="$1"
+    local COMMAND="$2"
+    local LOCATION="$RUN_PATH/$MODULE"
+    local FILE="install.infra"
+
+    if [ "$COMMAND" == "upgrade" ]; then
+        FILE="upgrade.infra"
+    fi
+
+    if [ ! -f "$LOCATION/$FILE" ]; then
+        error "No $FILE found. You must create the $FILE file inside module folder: $MODULE/$FILE"
+        exit 1;
+    fi
+
+    cat $LOCATION/$FILE | awk '/ask\s|ask_yes_no\s/ {print $0}' | awk 'BEGIN {FPAT = "([^ ]+)|(\"[^\"]+\")"}{for(i=1;i<=NF;i++){gsub(" "," ",$i)} print $2"="$3}'
 
 }
 
@@ -342,10 +372,10 @@ install() {
     info "Using the $FILE file located at: $LOCATION/$FILE"
 
     RUN_MODULE="$MODULE"
-    RUN_MODULE_LOCATION="$LOCATION"
+    RUN_MODULE_PATH="$LOCATION"
 
     activate_variables $MODULE $VARIABLES
-    cd $LOCATION && source $FILE
+    cd $LOCATION && source $FILE && cd $RUN_PATH
 
     success "Module installation completed."
     exit 0
@@ -378,17 +408,17 @@ upgrade() {
     info "Using the $FILE file located at: $LOCATION/$FILE"
 
     RUN_MODULE="$MODULE"
-    RUN_MODULE_LOCATION="$LOCATION"
+    RUN_MODULE_PATH="$LOCATION"
 
     activate_variables $MODULE $VARIABLES
-    cd $LOCATION && source $FILE
+    cd $LOCATION && source $FILE && cd $RUN_PATH
 
     success "Module upgrade completed."
     exit 0
 
 }
 
-if [[ $1 =~ ^(version|help|install|upgrade)$ ]]; then
+if [[ $1 =~ ^(version|help|extract|install|upgrade)$ ]]; then
     "$@"
 else
     echo "Invalid infralet subcommand: $1" >&2

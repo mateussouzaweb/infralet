@@ -26,7 +26,7 @@ sudo chmod +x /usr/local/bin/infralet
 From source:
 
 ```bash
-git clone https://github.com/mateussouzaweb/infralet.git
+git clone https://github.com/mateussouzaweb/infralet.git && cd infralet
 sudo cp infralet.sh /usr/local/bin/infralet
 sudo chmod +x /usr/local/bin/infralet
 ```

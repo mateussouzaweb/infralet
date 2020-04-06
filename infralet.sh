@@ -121,7 +121,7 @@ normalize() {
 
     local FILE="$1"
     local TYPE="$2"
-    local REAL=$(realpath "$FILE")
+    local REAL=$(realpath -s "$FILE")
 
     if [ "$TYPE" == "dir" ]; then
         REAL=$(dirname "$REAL")
@@ -146,13 +146,25 @@ manipulate() {
     local OVERWRITTEN=""
 
     # Check source file
-    if [ ! -f "$SOURCE" ]; then
+    if [ -z "$SOURCE" -o ! -f "$SOURCE" ]; then
         error "Command $TYPE failed. Source file does not exists: $SOURCE"
         exit 1;
     fi
 
+    # Check if source is symbolic
+    if [ -h "$SOURCE" ]; then
+         error "Command $TYPE failed. Source file is symbolic link: $SOURCE"
+        exit 1;
+    fi
+
+    # Check source is equal destination
+    if [ "$SOURCE" == "$DESTINATION" ]; then
+        error "Command $TYPE failed. Source file is the same as destination: $SOURCE"
+        exit 1;
+    fi
+
     # Check destination for append
-    if [ "$TYPE" == "append" ] && [ ! -f "$DESTINATION" ]; then
+    if [ "$TYPE" == "append" ] && [ -z "$DESTINATION" -o ! -f "$DESTINATION" ]; then
         error "Command $TYPE failed. Destination file does not exists: $DESTINATION"
         exit 1;
 
@@ -253,7 +265,7 @@ load_variables() {
         info "Using the $FILE file located at: $LOCATION"
     fi
 
-    source $LOCATION
+    export $(grep -v '^#' $LOCATION | xargs)
 
 }
 
@@ -298,8 +310,7 @@ module_command() {
 
     info "Using the $FILE file located at: $LOCATION/$FILE"
 
-    load_variables $LOCATION
-
+    load_variables $LOCATION && \
     cd $LOCATION && \
     source $FILE && \
     cd $RUN_PATH

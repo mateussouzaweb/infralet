@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# set -u
 
-export INFRALET_VERSION="0.0.8"
+export INFRALET_VERSION="0.0.9"
 export RUN_PATH="$(pwd)"
 
 # Printing colored text
@@ -191,12 +190,13 @@ manipulate() {
             exit 1;
         fi
 
-        envsubst < $DESTINATION > $TEMPORARY && mv $TEMPORARY $DESTINATION
+        replace_variables $DESTINATION
 
     # Append
     elif [ "$TYPE" == "append" ]; then
 
-        envsubst < $SOURCE > $TEMPORARY && \
+        cat $SOURCE > $TEMPORARY && \
+        replace_variables $TEMPORARY && \
         cat $TEMPORARY >> $DESTINATION && \
         rm $TEMPORARY
 
@@ -284,6 +284,34 @@ extract_variables() {
     fi
 
     cat $LOCATION/$FILE | awk '/ask |ask_yes_no / {print $0}' | awk 'BEGIN {FPAT = "([^ ]+)|(\"[^\"]+\")"}{for(i=1;i<=NF;i++){gsub(" "," ",$i)} print $2"="$3}'
+
+}
+
+# Replace env variables on file
+# To avoid unnecessary scaping, only works with ${VAR} sintax
+# @param $1 file
+replace_variables() {
+
+    local FILE=$(normalize "$1")
+
+    if [ ! -f "$FILE" ]; then
+        error "File not found to replace variables: $FILE"
+        exit 1;
+    fi
+
+    TPL=$(cat $FILE)
+
+    for ROW in $(env); do
+
+        SAVEIFS=$IFS
+        IFS="="
+        read KEY VALUE <<< "$ROW"
+        IFS=$SAVEIFS
+        TPL=$(echo "$TPL" | awk '{gsub(/\$\{'"$KEY"'\}/,"'"$VALUE"'"); print}')
+
+    done;
+
+    echo "$TPL" > "$FILE"
 
 }
 

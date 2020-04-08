@@ -195,7 +195,8 @@ manipulate() {
     # Append
     elif [ "$TYPE" == "append" ]; then
 
-        cat $SOURCE > $TEMPORARY && \
+        cat <<< "
+$(cat $SOURCE)" > $TEMPORARY && \
         replace_variables $TEMPORARY && \
         cat $TEMPORARY >> $DESTINATION && \
         rm $TEMPORARY

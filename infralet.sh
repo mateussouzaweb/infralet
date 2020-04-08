@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.0.9"
+export INFRALET_VERSION="0.0.10"
 export RUN_PATH="$(pwd)"
 
 # Printing colored text
@@ -308,7 +308,10 @@ replace_variables() {
         IFS="="
         read KEY VALUE <<< "$ROW"
         IFS=$SAVEIFS
-        TPL=$(echo "$TPL" | awk '{gsub(/\$\{'"$KEY"'\}/,"'"$VALUE"'"); print}')
+
+        if [[ "$KEY" =~ ^[A-Z0-9_]+$ ]]; then
+            TPL=$(echo "$TPL" | awk '{gsub(/\$\{'"$KEY"'\}/,"'"$VALUE"'"); print}')
+        fi
 
     done;
 

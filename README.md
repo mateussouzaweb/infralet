@@ -2,7 +2,7 @@
 
 Whatever you do, infralet it!
 
-This project was created to help sysadmins install and upgrade cloud servers without the pain of be lost on the Linux filesystem. Keep everything in one place and infralet it!
+This project was created to help sysadmins execute server tasks without the pain of be lost on the Linux filesystem. Keep everything in one place and infralet it!
 
 The project goes to the complete opposite of the container trend mainly because:
 
@@ -39,10 +39,10 @@ After you create your module (see below), simply run the necessary command:
 cd path/to/project
 
 # Install the module
-infralet install [module]
+infralet module/install
 
 # Upgrade the module
-infralet upgrade [module]
+infralet module/upgrade
 
 # See usage help
 infralet help

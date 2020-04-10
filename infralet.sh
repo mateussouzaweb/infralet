@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.0.11"
+export INFRALET_VERSION="0.0.12"
 export RUN_PATH="$(pwd)"
+export RUN_CMD=( $@ )
 
 # Printing colored text
 # @param $1 expression
@@ -131,11 +132,11 @@ normalize() {
     echo "$REAL"
 }
 
-# Manipulate file by symlink, copy or append
+# manipulate file by symlink, copy or append
 # @param $1 type
 # @param $2 source
 # @param $3 destination
-manipulate() {
+manipulate_file() {
 
     local TYPE="$1"
     local SOURCE=$(normalize "$2")
@@ -222,7 +223,7 @@ $(cat $SOURCE)" > $TEMPORARY && \
 # @param $1 source
 # @param $2 destination
 copy() {
-    manipulate "copy" "$1" "$2"
+    manipulate_file "copy" "$1" "$2"
 }
 
 # Append content on file
@@ -230,23 +231,71 @@ copy() {
 # @param $1 source
 # @param $2 destination
 append() {
-    manipulate "append" "$1" "$2"
+    manipulate_file "append" "$1" "$2"
 }
 
 # Make symbolic link
 # @param $1 source
 # @param $2 destination
 symlink() {
-    manipulate "symlink" "$1" "$2"
+    manipulate_file "symlink" "$1" "$2"
+}
+
+# Replace match on string
+# @param $1 search
+# @param $2 replace
+# @param $3 string
+str_replace(){
+
+    local SEARCH="$1"
+    local REPLACE="$2"
+    local STRING="$3"
+
+    if [ -z "$STRING" ]; then
+        STRING=$(</dev/stdin)
+    fi
+
+    echo $(echo "$STRING" | awk '{gsub("'$SEARCH'","'$REPLACE'"); print}')
+}
+
+# Retrieve cli parsed param
+# @param $1 param
+# @param $2 default
+# @param $3 flag
+get_param() {
+
+    local PARAM="$1"
+    local RESULT="$2"
+    local FLAG="$3"
+    local LEN=${#RUN_CMD[@]}
+
+    if [ "$PARAM" == "_last_" ]; then
+        RESULT=${RUN_CMD[$LEN-1]}
+    elif [ "$PARAM" == "_first_" ]; then
+        RESULT=${RUN_CMD[0]}
+    else
+        for (( i=0; i<$LEN; i++ )); do
+            if [ "${RUN_CMD[ $i ]}" == "$PARAM" -a "$FLAG" == true ]; then
+                break
+            fi
+            if [ "${RUN_CMD[$i]}" == "$PARAM" ]; then
+                RESULT=${RUN_CMD[ ($i + 1) ]}
+                break
+            fi
+        done
+    fi
+
+    echo $RESULT
+
 }
 
 # Recursive load variables from directory
 # @param $1 directory
 load_variables() {
 
-    local DIRECTORY=$(normalize "$1")
     local FILE="variables.env"
-    local LOCATION="$DIRECTORY/$FILE"
+    local DIRECTORY=$(normalize "$1" | str_replace "$FILE" "")
+    local LOCATION=$(echo "$DIRECTORY/$FILE" | str_replace "//" "/")
 
     while [ ! -f "$LOCATION" ]; do
 
@@ -260,27 +309,27 @@ load_variables() {
     done
 
     if [ ! -f "$LOCATION" ]; then
-        error "No $FILE found. You must create or tell the $FILE file."
-        exit 1;
+        warning "No $FILE found. You must create or tell the $FILE file. Skipping..."
     else
         info "Using the $FILE file located at: $LOCATION"
+        if [ -s "$LOCATION" ]; then
+            export $(grep -v '^#' $LOCATION | xargs)
+        fi
     fi
-
-    export $(grep -v '^#' $LOCATION | xargs)
 
 }
 
 # Extract and print variables with their default values on stdout
 # @param $1 command
-# @param $2 module
 extract_variables() {
 
-    local FILE="$1.infra"
-    local LOCATION=$(normalize "$2")
-    local MODULE=$(normalize "$LOCATION" "name")
+    local PARSED=$(echo "$1" | str_replace ".infra" "")
+    local LOCATION=$(normalize "$PARSED" "dir")
+    local COMMAND=$(normalize "$PARSED" "name")
+    local FILE="$COMMAND.infra"
 
     if [ ! -f "$LOCATION/$FILE" ]; then
-        error "No $FILE found. You must create the $FILE file inside module folder: $MODULE/$FILE"
+        error "No $FILE found. You must create the $FILE file inside module folder: $LOCATION/$FILE"
         exit 1;
     fi
 
@@ -320,34 +369,32 @@ replace_variables() {
 }
 
 # Run module command
-# @param $1 module
-# @param $2 command
-# @param $3 variables
-module_command() {
+execute_command() {
 
-    if [ -z "$1" ]; then
-        error "You must tell the module to run command."
-        exit 1;
-    fi
+    local VARIABLES=$(get_param "--e")
+    local PARSED=$(get_param "_last_" | str_replace ".infra" "")
 
-    if [ -z "$2" ]; then
+    if [ -z "$PARSED" ]; then
         error "You must tell the command to run."
         exit 1;
     fi
 
-    local LOCATION=$(normalize "$1")
-    local MODULE=$(normalize "$LOCATION" "name")
-    local FILE="$2.infra"
-    local VARIABLES="$3"
+    local LOCATION=$(normalize "$PARSED" "dir")
+    local COMMAND=$(normalize "$PARSED" "name")
+    local FILE="$COMMAND.infra"
+
+    if [ -z "$VARIABLES" ]; then
+        VARIABLES="$LOCATION"
+    fi
 
     if [ ! -f "$LOCATION/$FILE" ]; then
-        error "No $FILE found. You must create the $FILE file inside module folder: $MODULE/$FILE"
+        error "No $FILE found. You must create the $FILE file inside module folder: $LOCATION/$FILE"
         exit 1;
     fi
 
     info "Using the $FILE file located at: $LOCATION/$FILE"
 
-    load_variables $LOCATION && \
+    load_variables $VARIABLES && \
     cd $LOCATION && \
     source $FILE && \
     cd $RUN_PATH
@@ -358,15 +405,15 @@ module_command() {
 
 # Extract and print variables with their default values on stdout
 # @param $1 command
-# @param $2 module
-# @param $3 module...
+# @param $2 command
+# @param $3 command...
 extract() {
 
     argc=$#
     argv=("$@")
 
-    for (( j=1; j<argc; j++ )); do
-        extract_variables "$1" "${argv[j]}"
+    for (( j=0; j<argc; j++ )); do
+        extract_variables "${argv[j]}"
     done
 
 }
@@ -388,19 +435,19 @@ infralet version
 infralet help
     - Print this help message.
 
-infralet extract [command] [module] [module...] [module...]
-    - Extract module(s) variables created by ask commands.
+infralet extract [command] [command...] [command...]
+    - Extract variables created by ask commands.
 
-infralet [module] [command]
-    - Execute a user defined command on module.
+infralet [command] [--e variables.env]
+    - Execute a user defined command.
 EOF
 
 }
 
 if [[ $1 =~ ^(version|help|extract)$ ]]; then
     "$@"
-elif [[ ! -z $2 ]]; then
-    module_command "$2" "$1" "$3"
+elif [[ ! -z $1 ]]; then
+    execute_command
 else
     echo "Invalid infralet subcommand: $1" >&2
     exit 1

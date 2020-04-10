@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.0.10"
+export INFRALET_VERSION="0.0.11"
 export RUN_PATH="$(pwd)"
 
 # Printing colored text
@@ -330,6 +330,11 @@ module_command() {
         exit 1;
     fi
 
+    if [ -z "$2" ]; then
+        error "You must tell the command to run."
+        exit 1;
+    fi
+
     local LOCATION=$(normalize "$1")
     local MODULE=$(normalize "$LOCATION" "name")
     local FILE="$2.infra"
@@ -347,6 +352,8 @@ module_command() {
     source $FILE && \
     cd $RUN_PATH
 
+    success "Module command completed."
+
 }
 
 # Extract and print variables with their default values on stdout
@@ -362,24 +369,6 @@ extract() {
         extract_variables "$1" "${argv[j]}"
     done
 
-}
-
-# Install a module
-# @param $1 module
-# @param $2 variables file
-install() {
-    module_command "$1" "install" "$2"
-    success "Module installation completed."
-    exit 0
-}
-
-# Upgrade a module
-# @param $1 module
-# @param $2 variables file
-upgrade() {
-    module_command "$1" "upgrade" "$2"
-    success "Module upgrade completed."
-    exit 0
 }
 
 # Print the version message
@@ -402,17 +391,16 @@ infralet help
 infralet extract [command] [module] [module...] [module...]
     - Extract module(s) variables created by ask commands.
 
-infralet install [module]
-    - Install a user defined module.
-
-infralet upgrade [module]
-    - Upgrade a user defined module.
+infralet [module] [command]
+    - Execute a user defined command on module.
 EOF
 
 }
 
-if [[ $1 =~ ^(version|help|extract|install|upgrade)$ ]]; then
+if [[ $1 =~ ^(version|help|extract)$ ]]; then
     "$@"
+elif [[ ! -z $2 ]]; then
+    module_command "$2" "$1" "$3"
 else
     echo "Invalid infralet subcommand: $1" >&2
     exit 1

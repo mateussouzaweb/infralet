@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.0.12"
+export INFRALET_VERSION="0.0.13"
 export RUN_PATH="$(pwd)"
 export RUN_CMD=( $@ )
 
@@ -27,10 +27,14 @@ colored_echo() {
        esac
     fi
 
-    tput bold;
-    tput setaf "$COLOR";
-    echo "$ARROW $MESSAGE";
-    tput sgr0;
+    if [[ -t 1 ]]; then
+        tput bold;
+        tput setaf "$COLOR";
+        echo "$ARROW $MESSAGE";
+        tput sgr0;
+    else
+        echo "$ARROW $MESSAGE";
+    fi
 
 }
 
@@ -438,7 +442,7 @@ infralet help
 infralet extract [command] [command...] [command...]
     - Extract variables created by ask commands.
 
-infralet [command] [--e variables.env]
+infralet [--e variables.env] [command]
     - Execute a user defined command.
 EOF
 

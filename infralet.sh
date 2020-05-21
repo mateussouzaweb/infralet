@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.0.13"
+export INFRALET_VERSION="0.0.14"
 export RUN_PATH="$(pwd)"
 export RUN_CMD=( $@ )
 
@@ -307,6 +307,8 @@ load_variables() {
         LOCATION="$DIRECTORY/$FILE"
 
         if [ "$DIRECTORY" == "$RUN_PATH" ]; then
+            break;
+        elif [ "$DIRECTORY" == "/" ]; then
             break;
         fi
 

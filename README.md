@@ -39,10 +39,10 @@ After you create your module (see below), simply run the necessary command:
 cd path/to/project
 
 # Install the module
-infralet module/install
+infralet run module/install
 
 # Upgrade the module
-infralet module/upgrade
+infralet run module/upgrade
 
 # See usage help
 infralet help

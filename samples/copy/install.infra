@@ -1,13 +1,13 @@
 # Infralet Script
 
-ask THE_USERNAME "MATEUS" "What is your name?"
-ask_yes_no ALSO_APPEND "Y" "Also append additional content?"
+infralet ask THE_USERNAME "MATEUS" "What is your name?"
+infralet ask_yes_no ALSO_APPEND "Y" "Also append additional content?"
 
 # Copy and append always is relative to the module folder
-copy source.txt destination.txt
+infralet copy source.txt destination.txt
 
 if [ "$ALSO_APPEND" == "Y" ]; then
-    append append.txt destination.txt
+    infralet append append.txt destination.txt
 fi
 
 # Print the result

@@ -282,7 +282,7 @@ __load_variables() {
 # @param $1 command
 __extract_variables() {
 
-    local PARSED=$(echo "$1" | __str_replace ".infra" "")
+    local PARSED=$(echo $1 | sed 's/\.infra$//g')
     local LOCATION=$(__normalize_path "$PARSED" "dir")
     local COMMAND=$(__normalize_path "$PARSED" "name")
     local FILE="$COMMAND.infra"
@@ -401,7 +401,7 @@ __get_param() {
 # Run module command
 __run() {
 
-    local PARSED=$(echo $1 | __str_replace ".infra" "")
+    local PARSED=$(echo $1 | sed 's/\.infra$//g')
     local VARIABLES=$(__get_param "--e" "" "" $@)
 
     if [ -z "$PARSED" ]; then

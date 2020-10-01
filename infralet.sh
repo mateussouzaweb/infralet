@@ -292,7 +292,7 @@ __extract_variables() {
         exit 1;
     fi
 
-    cat $LOCATION/$FILE | awk '/infralet ask |infralet ask_yes_no / {print $0}' | awk 'BEGIN {FPAT = "([^ ]+)|(\"[^\"]+\")"}{for(i=1;i<=NF;i++){gsub(" "," ",$i)} print $2"="$3}'
+    cat $LOCATION/$FILE | awk '/infralet ask |infralet ask_yes_no / {print $0}' | awk 'BEGIN {FPAT = "([^ ]+)|(\"[^\"]+\")"}{for(i=1;i<=NF;i++){gsub(" "," ",$i)} print $3"="$4}'
 
 }
 

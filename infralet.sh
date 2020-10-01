@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.0.2"
+export INFRALET_VERSION="0.1.0"
 export INFRALET_RUN_PATH="$(pwd)"
 
 ##

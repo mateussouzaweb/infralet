@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.1.0"
+export INFRALET_VERSION="0.1.1"
 export INFRALET_RUN_PATH="$(pwd)"
 
 ##
@@ -247,11 +247,11 @@ __symlink() {
 ##
 
 # Recursive load variables from directory
-# @param $1 directory
+# @param $1 file path
 __load_variables() {
 
-    local FILE="variables.env"
-    local DIRECTORY=$(__normalize_path "$1" | __str_replace "$FILE" "")
+    local FILE=$(__normalize_path "$1" "name")
+    local DIRECTORY=$(__normalize_path "$1" "dir")
     local LOCATION=$(echo "$DIRECTORY/$FILE" | __str_replace "//" "/")
 
     while [ ! -f "$LOCATION" ]; do
@@ -268,9 +268,9 @@ __load_variables() {
     done
 
     if [ ! -f "$LOCATION" ]; then
-        __warning "No $FILE found. You must create or tell the $FILE file. Skipping..."
+        __warning "No $FILE found. You must create or tell the variables file to load variables. Skipping..."
     else
-        __info "Using the $FILE file located at: $LOCATION"
+        __info "Using the variables file located at: $LOCATION"
         if [ -s "$LOCATION" ]; then
             export $(grep -v '^#' $LOCATION | xargs)
         fi
@@ -414,7 +414,7 @@ __run() {
     local FILE="$COMMAND.infra"
 
     if [ -z "$VARIABLES" ]; then
-        VARIABLES="$LOCATION"
+        VARIABLES="$LOCATION/variables.env"
     fi
 
     if [ ! -f "$LOCATION/$FILE" ]; then

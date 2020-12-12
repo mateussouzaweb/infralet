@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export INFRALET_VERSION="0.1.1"
+export INFRALET_VERSION="0.1.2"
 export INFRALET_RUN_PATH="$(pwd)"
 
 ##
@@ -292,7 +292,10 @@ __extract_variables() {
         exit 1;
     fi
 
-    cat $LOCATION/$FILE | awk '/infralet ask |infralet ask_yes_no / {print $0}' | awk 'BEGIN {FPAT = "([^ ]+)|(\"[^\"]+\")"}{for(i=1;i<=NF;i++){gsub(" "," ",$i)} print $3"="$4}'
+    cat $LOCATION/$FILE | \
+    sed -E ':a; N; $!ba; s/[\\]([\n\t\r ]+)/ /g' | \
+    awk '/infralet ask |infralet ask_yes_no / {print $0}' | \
+    awk 'BEGIN {FPAT = "([^ ]+)|(\"[^\"]+\")"}{for(i=1;i<=NF;i++){gsub(" "," ",$i)} print $3"="$4}'
 
 }
 

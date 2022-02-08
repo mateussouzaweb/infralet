@@ -272,9 +272,7 @@ __load_variables() {
 
     done
 
-    if [ ! -f "$LOCATION" ]; then
-        __warning "No $FILE found. You must create or tell the variables file to load variables. Skipping..."
-    else
+    if [ -f "$LOCATION" ]; then
         __info "Using the variables file located at: $LOCATION"
         if [ -s "$LOCATION" ]; then
             export $(grep -v '^#' $LOCATION | xargs)

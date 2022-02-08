@@ -56,7 +56,7 @@ Each module is a folder that contains a set of files:
 
 install.infra # The install file for the module
 upgrade.infra # The upgrade file for the module
-variables.env # The environment variables used at install and upgrade this module. It also works a bucket to your secrets
+variables.env # The environment variables used at install and upgrade this module. It also works as a bucket to your secrets
 ```
 
 You can write any shell script into these files to process your module. See the ``samples/`` folder to get a few examples.

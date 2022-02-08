@@ -122,7 +122,12 @@ __normalize_path() {
 
     local FILE="$1"
     local TYPE="$2"
-    local REAL=$(realpath -s "$FILE")
+
+    if hash realpath 2>/dev/null; then
+       local REAL=$(realpath -s "$FILE")
+    else
+       local REAL=$(cd "$(dirname "$FILE")"; echo "$(pwd -P)/$(basename "$FILE")")
+    fi
 
     if [ "$TYPE" == "dir" ]; then
         REAL=$(dirname "$REAL")

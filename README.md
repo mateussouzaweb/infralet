@@ -19,7 +19,7 @@ Infralet is ready to go without any learning curve. In fact, it is just a helper
 From repository:
 
 ```bash
-sudo wget https://raw.githubusercontent.com/mateussouzaweb/infralet/master/infralet.sh -O /usr/local/bin/infralet && sudo chmod +x /usr/local/bin/infralet
+sudo curl -o /usr/local/bin/infralet https://raw.githubusercontent.com/mateussouzaweb/infralet/master/infralet.sh && sudo chmod +x /usr/local/bin/infralet
 ```
 
 From source:

@@ -339,6 +339,33 @@ __replace_variables() {
 ## HELPER FUNCTIONS
 ##
 
+# Return the current operational system
+__os() {
+
+   local OS="unknown"
+   [[ -f "/etc/os-release" ]] && source /etc/os-release && OS=$ID
+   [[ "$OSTYPE" == 'darwin'* ]] && OS="mac"
+   [[ "$(uname)" == 'Windows'* ]] && OS="windows"
+   [[ "$OS" == 'Deepin' ]] && OS="deepin"
+
+   echo $OS
+}
+
+# Check if current operational system match any of the given OS
+# Possible values are: mac, windows, ubuntu, fedora, ...
+# @param $@ list...
+__is() {
+
+   local OS=$(__os)
+   for i in "$@"; do
+       if [ "$OS" == "$i" ]; then
+           return 0 # true
+       fi
+   done
+
+   return 1 # false
+}
+
 # Allow execution only in sudo mode
 __only_sudo() {
 
@@ -512,6 +539,12 @@ infralet symlink
 
 infralet only_sudo
     - Allow the execution only with the sudo user.
+
+infralet os
+    - Return the current operational system.
+
+infralet is
+    - Check if the current operational system match one of the given list.
 
 == OTHERS (less used) ==
 
